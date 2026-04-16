@@ -9,6 +9,7 @@
   let poetryData = [];
   let currentFilter = 'all';
   let currentSearch = '';
+  let searchHistory = [];
 
   // ==================== Data Loading ====================
   async function loadData() {
@@ -83,7 +84,23 @@
   }
 
   function applyFilters() {
-    const s = currentSearch.toLowerCase();
+    const rawSearch = currentSearch.trim();
+    let keywords = [];
+    let regex = null;
+    let isRegex = false;
+
+    if (rawSearch) {
+      if (rawSearch.startsWith('/') && rawSearch.endsWith('/') && rawSearch.length > 2) {
+        try {
+          regex = new RegExp(rawSearch.slice(1, -1), 'i');
+          isRegex = true;
+        } catch (e) {
+          keywords = [rawSearch.toLowerCase()];
+        }
+      } else {
+        keywords = rawSearch.toLowerCase().split(/\s+/);
+      }
+    }
     
     document.querySelectorAll('.group-card').forEach(card => {
       const cardEra = card.dataset.era;
@@ -93,13 +110,17 @@
       let matchEra = (currentFilter === 'all' || cardEra === currentFilter);
       let matchSearch = true;
       
-      if (s && groupData) {
-        matchSearch = groupData.group.toLowerCase().includes(s) || 
-                      groupData.figures.some(f => 
-                        f.name.toLowerCase().includes(s) || 
-                        f.title.toLowerCase().includes(s) || 
-                        f.desc.toLowerCase().includes(s)
-                      );
+      if (rawSearch && groupData) {
+        const textToSearch = [
+          groupData.group,
+          ...groupData.figures.map(f => `${f.name} ${f.title} ${f.desc} ${f.quote}`)
+        ].join(' ');
+
+        if (isRegex && regex) {
+          matchSearch = regex.test(textToSearch);
+        } else {
+          matchSearch = keywords.every(kw => textToSearch.toLowerCase().includes(kw));
+        }
       }
       
       if (matchEra && matchSearch) {
@@ -260,10 +281,93 @@
   function setupSearchAndTheme() {
     // Search
     const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
+    const searchHistoryEl = document.getElementById('searchHistory');
+    
+    if (searchInput && searchHistoryEl) {
+      try {
+        searchHistory = JSON.parse(localStorage.getItem('pantheonSearchHistory') || '[]');
+      } catch(e) { searchHistory = []; }
+
+      const renderHistory = () => {
+        if (searchHistory.length === 0) {
+          searchHistoryEl.innerHTML = '<div style="padding: 12px; color: var(--text-muted); font-size: 0.85rem; text-align: center;">暂无搜索记录</div>';
+          return;
+        }
+        let html = searchHistory.map(term => `
+          <div class="history-item" data-term="${term}">
+            <span>${term}</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" style="color:var(--text-muted);"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </div>
+        `).join('');
+        html += '<div class="history-clear" id="clearHistory">清除记录</div>';
+        searchHistoryEl.innerHTML = html;
+
+        searchHistoryEl.querySelectorAll('.history-item').forEach(el => {
+          el.addEventListener('click', (e) => {
+            if (e.target.closest('svg')) {
+              // Delete item
+              searchHistory = searchHistory.filter(t => t !== el.dataset.term);
+              saveHistory();
+              renderHistory();
+              e.stopPropagation();
+            } else {
+              // Quick search
+              searchInput.value = el.dataset.term;
+              currentSearch = el.dataset.term;
+              applyFilters();
+              searchHistoryEl.classList.remove('active');
+            }
+          });
+        });
+
+        document.getElementById('clearHistory')?.addEventListener('click', (e) => {
+          searchHistory = [];
+          saveHistory();
+          renderHistory();
+          e.stopPropagation();
+        });
+      };
+
+      const saveHistory = () => {
+        localStorage.setItem('pantheonSearchHistory', JSON.stringify(searchHistory));
+      };
+
+      renderHistory();
+
       searchInput.addEventListener('input', (e) => {
-        currentSearch = e.target.value.trim();
+        currentSearch = e.target.value;
         applyFilters();
+      });
+
+      searchInput.addEventListener('focus', () => {
+        renderHistory();
+        searchHistoryEl.classList.add('active');
+      });
+
+      const handleSaveHistory = () => {
+        const term = currentSearch.trim();
+        if (term && !searchHistory.includes(term)) {
+          searchHistory.unshift(term);
+          if (searchHistory.length > 5) searchHistory.pop();
+          saveHistory();
+        }
+      };
+
+      document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !searchHistoryEl.contains(e.target)) {
+          if (searchHistoryEl.classList.contains('active')) {
+            searchHistoryEl.classList.remove('active');
+            handleSaveHistory();
+          }
+        }
+      });
+      
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          searchHistoryEl.classList.remove('active');
+          handleSaveHistory();
+          searchInput.blur();
+        }
       });
     }
 
