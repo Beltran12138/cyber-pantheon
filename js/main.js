@@ -8,6 +8,7 @@
   let figuresData = [];
   let poetryData = [];
   let currentFilter = 'all';
+  let currentSearch = '';
 
   // ==================== Data Loading ====================
   async function loadData() {
@@ -76,12 +77,32 @@
 
     // Update active state
     document.querySelectorAll('.era-tag').forEach(t => t.classList.remove('active'));
-    activeTag.classList.add('active');
+    if(activeTag) activeTag.classList.add('active');
 
-    // Filter cards
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const s = currentSearch.toLowerCase();
+    
     document.querySelectorAll('.group-card').forEach(card => {
       const cardEra = card.dataset.era;
-      if (era === 'all' || cardEra === era) {
+      const id = parseInt(card.dataset.id);
+      const groupData = figuresData.find(g => g.id === id);
+      
+      let matchEra = (currentFilter === 'all' || cardEra === currentFilter);
+      let matchSearch = true;
+      
+      if (s && groupData) {
+        matchSearch = groupData.group.toLowerCase().includes(s) || 
+                      groupData.figures.some(f => 
+                        f.name.toLowerCase().includes(s) || 
+                        f.title.toLowerCase().includes(s) || 
+                        f.desc.toLowerCase().includes(s)
+                      );
+      }
+      
+      if (matchEra && matchSearch) {
         card.style.display = '';
         setTimeout(() => card.classList.add('visible'), 50);
       } else {
@@ -111,12 +132,17 @@
         <div class="card-era">${group.era} · ${group.year}</div>
         <div class="card-group-name">${group.group}</div>
         <div class="card-figures">
-          ${group.figures.map(f => `
+          ${group.figures.map(f => {
+            const avatarSrc = f.name === '乔布斯' ? 'assets/avatars/avatar_modern.png' : 'assets/avatars/avatar_ancient.png';
+            return `
             <div class="card-figure">
-              <span class="figure-name">${f.name}</span>
-              <span class="figure-title">${f.title}</span>
+              <img src="${avatarSrc}" class="figure-avatar" onerror="this.src='assets/avatars/placeholder.png'" alt="${f.name}">
+              <div class="figure-info">
+                <span class="figure-name">${f.name}</span>
+                <span class="figure-title">${f.title}</span>
+              </div>
             </div>
-          `).join('')}
+          `}).join('')}
         </div>
         <div class="card-quote">${repQuote}</div>
       `;
@@ -175,15 +201,20 @@
     content.innerHTML = `
       <div class="modal-era-badge">${group.era} · ${group.year}</div>
       <div class="modal-group-title">${group.group}</div>
-      ${group.figures.map(f => `
+      ${group.figures.map(f => {
+        const avatarSrc = f.name === '乔布斯' ? 'assets/avatars/avatar_modern.png' : 'assets/avatars/avatar_ancient.png';
+        return `
         <div class="modal-figure">
-          <div class="modal-figure-name">${f.name}${f.fullName !== f.name ? ` <span style="color:var(--text-muted);font-size:0.85rem;font-weight:400">${f.fullName}</span>` : ''}</div>
-          <div class="modal-figure-title">${f.title}</div>
-          <div class="modal-figure-years">${f.born}${f.died ? ' — ' + f.died : ' — 至今'}</div>
-          <div class="modal-figure-desc">${f.desc}</div>
-          <div class="modal-figure-quote">${f.quote}</div>
+          <img src="${avatarSrc}" class="modal-figure-avatar" onerror="this.src='assets/avatars/placeholder.png'" alt="${f.name}">
+          <div class="modal-figure-content">
+            <div class="modal-figure-name">${f.name}${f.fullName !== f.name ? ` <span style="color:var(--text-muted);font-size:0.85rem;font-weight:400">${f.fullName}</span>` : ''}</div>
+            <div class="modal-figure-title">${f.title}</div>
+            <div class="modal-figure-years">${f.born}${f.died ? ' — ' + f.died : ' — 至今'}</div>
+            <div class="modal-figure-desc">${f.desc}</div>
+            <div class="modal-figure-quote">${f.quote}</div>
+          </div>
         </div>
-      `).join('')}
+        `}).join('')}
     `;
 
     overlay.classList.add('active');
@@ -225,6 +256,49 @@
     });
   }
 
+  // ==================== Search & Theme Setup ====================
+  function setupSearchAndTheme() {
+    // Search
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        currentSearch = e.target.value.trim();
+        applyFilters();
+      });
+    }
+
+    // Theme
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      const html = document.documentElement;
+      const sun = btn.querySelector('.sun-icon');
+      const moon = btn.querySelector('.moon-icon');
+
+      const savedTheme = localStorage.getItem('pantheonTheme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      let currentTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+      
+      const applyTheme = (theme) => {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('pantheonTheme', theme);
+        if (theme === 'dark') {
+          sun.style.display = 'block';
+          moon.style.display = 'none';
+        } else {
+          sun.style.display = 'none';
+          moon.style.display = 'block';
+        }
+      };
+      
+      applyTheme(currentTheme);
+
+      btn.addEventListener('click', () => {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(currentTheme);
+      });
+    }
+  }
+
   // ==================== Scroll Hint Hide ====================
   function setupScrollHintHide() {
     const hint = document.getElementById('scrollHint');
@@ -247,6 +321,7 @@
     renderTimeline();
     renderPantheon();
     renderPoetry();
+    setupSearchAndTheme();
     setupScrollObserver();
     setupScrollHintHide();
 
