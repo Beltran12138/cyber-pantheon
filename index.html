@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="赛博先贤祠 — 一座数字时代的精神殿堂，以壮志诗词为纽带，汇聚古今中外的英雄与思想家。Fork 即可创建你自己的先贤祠。">
+  <title>赛博先贤祠 | Cyber Pantheon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 粒子画布 -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- ===== Section 1: Hero 开场 ===== -->
+  <section id="hero" class="section hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title" id="heroTitle">
+        <span class="char-reveal">赛</span><span class="char-reveal">博</span><span class="char-reveal">先</span><span class="char-reveal">贤</span><span class="char-reveal">祠</span>
+      </h1>
+      <div class="hero-subtitle" id="heroSubtitle">CYBER PANTHEON</div>
+      <div class="hero-poem" id="heroPoem">
+        <!-- 《侠客行》逐行浮现 -->
+      </div>
+      <div class="hero-divider">
+        <span class="divider-line"></span>
+        <span class="divider-icon">⚔</span>
+        <span class="divider-line"></span>
+      </div>
+      <p class="hero-desc">一座数字时代的精神殿堂<br>以壮志诗词为纽带，汇聚古今中外的英雄与思想家</p>
+    </div>
+    <div class="scroll-hint" id="scrollHint">
+      <span class="scroll-text">向下探索</span>
+      <div class="scroll-mouse">
+        <div class="scroll-wheel"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Section 2: 时空长河 ===== -->
+  <section id="timeline" class="section timeline-section">
+    <div class="section-header">
+      <h2 class="section-title">时空长河</h2>
+      <p class="section-subtitle">从战国到当代，壮志跨越两千年</p>
+    </div>
+    <div class="timeline-nav" id="timelineNav">
+      <!-- JS 动态生成时代标签 -->
+    </div>
+  </section>
+
+  <!-- ===== Section 3: 先贤殿堂 ===== -->
+  <section id="pantheon" class="section pantheon-section">
+    <div class="pantheon-grid" id="pantheonGrid">
+      <!-- JS 动态生成人物卡片 -->
+    </div>
+  </section>
+
+  <!-- ===== Section 4: 壮志诗墙 ===== -->
+  <section id="poetry" class="section poetry-section">
+    <div class="section-header">
+      <h2 class="section-title">壮志诗墙</h2>
+      <p class="section-subtitle">以诗铭志，千古回响</p>
+    </div>
+    <div class="poetry-wall" id="poetryWall">
+      <!-- JS 动态生成诗词展示 -->
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer id="footer" class="footer-section">
+    <div class="footer-cta">
+      <h2 class="cta-title">创建你自己的先贤祠</h2>
+      <p class="cta-desc">Fork 此项目，修改 <code>data/figures.json</code>，即可生成你的精神殿堂</p>
+      <a href="https://github.com" class="cta-button" id="forkButton" target="_blank" rel="noopener">
+        <svg class="github-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+        Fork on GitHub
+      </a>
+    </div>
+    <div class="footer-bottom">
+      <p>赛博先贤祠 · Cyber Pantheon</p>
+      <p class="footer-quote">纵死侠骨香，不惭世上英</p>
+    </div>
+  </footer>
+
+  <!-- 人物详情弹窗 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="figureModal">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="modal-content" id="modalContent">
+        <!-- JS 动态填充 -->
+      </div>
+    </div>
+  </div>
+
+  <script src="js/particles.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
