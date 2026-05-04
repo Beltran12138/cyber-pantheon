@@ -11,10 +11,16 @@ export function getFigureBySlug(slug: string): Figure | null {
   return figures.find(f => f.slug === slug) ?? null
 }
 
+const DEFAULT_COUNCIL = ['xin-qiji', 'yu-qian', 'li-guang-yao', 'ma-si-ke', 'tu-ling']
+
 export function getDefaultCouncil(): string[] {
-  return ['xin-qiji', 'yu-qian', 'li-guang-yao', 'ma-si-ke', 'tu-ling']
+  return DEFAULT_COUNCIL.filter(slug => getFigureBySlug(slug) !== null)
 }
 
 export function getFiguresBySlug(slugs: string[]): Figure[] {
-  return slugs.map(s => getFigureBySlug(s)).filter((f): f is Figure => f !== null)
+  const seen = new Set<string>()
+  return slugs
+    .filter(s => { if (seen.has(s)) return false; seen.add(s); return true })
+    .map(s => getFigureBySlug(s))
+    .filter((f): f is Figure => f !== null)
 }

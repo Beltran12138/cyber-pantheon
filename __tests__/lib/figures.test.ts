@@ -1,5 +1,5 @@
 import type { Figure, Poem } from '@/types'
-import { getFigureBySlug, getAllFigures, getDefaultCouncil } from '@/lib/figures'
+import { getFigureBySlug, getAllFigures, getDefaultCouncil, getFiguresBySlug } from '@/lib/figures'
 
 describe('Figure type', () => {
   it('accepts a valid figure object', () => {
@@ -37,5 +37,24 @@ describe('getAllFigures', () => {
 describe('getDefaultCouncil', () => {
   it('returns 5 slugs', () => {
     expect(getDefaultCouncil().length).toBe(5)
+  })
+})
+
+describe('getFiguresBySlug', () => {
+  it('deduplicates repeated slugs', () => {
+    const result = getFiguresBySlug(['xin-qiji', 'xin-qiji', 'yu-qian'])
+    expect(result.length).toBe(2)
+    expect(result[0].slug).toBe('xin-qiji')
+    expect(result[1].slug).toBe('yu-qian')
+  })
+})
+
+describe('getDefaultCouncil slugs exist', () => {
+  it('all default council slugs exist in figures data', () => {
+    const council = getDefaultCouncil()
+    expect(council.length).toBe(5)
+    council.forEach(slug => {
+      expect(getFigureBySlug(slug)).not.toBeNull()
+    })
   })
 })
