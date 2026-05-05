@@ -3,7 +3,7 @@ import OpenAI from 'openai'
 import { getFigureBySlug } from '@/lib/figures'
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.DEEPSEEK_API_KEY
+  const apiKey = process.env.DEEPSEEK_API_KEY?.replace(/^\uFEFF/, '')
   if (!apiKey) {
     return Response.json({ error: 'DEEPSEEK_API_KEY not configured' }, { status: 500 })
   }

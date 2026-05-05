@@ -3,11 +3,12 @@ import OpenAI from 'openai'
 import { getFiguresBySlug } from '@/lib/figures'
 
 export async function POST(req: NextRequest) {
-  if (!process.env.DEEPSEEK_API_KEY) {
+  const apiKey = process.env.DEEPSEEK_API_KEY?.replace(/^\uFEFF/, '')
+  if (!apiKey) {
     return Response.json({ error: 'server misconfigured' }, { status: 500 })
   }
   const deepseek = new OpenAI({
-    apiKey: process.env.DEEPSEEK_API_KEY,
+    apiKey,
     baseURL: 'https://api.deepseek.com',
   })
 
