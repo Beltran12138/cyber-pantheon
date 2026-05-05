@@ -2,11 +2,11 @@
 import { useState, useCallback, useRef, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
-import type { AuthResponse } from '@supabase/supabase-js'
 import FigureSelector from '@/components/FigureSelector'
 import CouncilFeed from '@/components/CouncilFeed'
 import PoemOverlay from '@/components/PoemOverlay'
 import { getFiguresBySlug, getDefaultCouncil } from '@/lib/figures'
+import type { UserResponse } from '@supabase/supabase-js'
 import type { CouncilMessage } from '@/types'
 
 function YishiInner() {
@@ -25,7 +25,7 @@ function YishiInner() {
   useEffect(() => {
     if (initialFigure) return
     const supabase = getSupabaseBrowser()
-    supabase.auth.getUser().then(async (result: AuthResponse) => {
+    supabase.auth.getUser().then(async (result: UserResponse) => {
       const user = result.data.user
       if (!user) return
       const { data: enshrines } = await supabase

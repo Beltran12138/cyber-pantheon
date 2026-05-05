@@ -17,14 +17,16 @@ export default function FigureCard({ figure, enshrined = false, onEnshrine }: Pr
           </a>
           <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>{figure.era}</p>
         </div>
-        <button
-          onClick={(e) => { e.preventDefault(); onEnshrine?.(figure.slug) }}
-          className="text-lg leading-none"
-          title={enshrined ? '已供奉' : '供奉'}
-          style={{ color: enshrined ? 'var(--gold)' : 'var(--border)' }}
-        >
-          ✦
-        </button>
+        {onEnshrine && (
+          <button
+            onClick={(e) => { e.preventDefault(); onEnshrine(figure.slug) }}
+            className="text-lg leading-none"
+            title={enshrined ? '已供奉' : '供奉'}
+            style={{ color: enshrined ? 'var(--gold)' : 'var(--border)' }}
+          >
+            ✦
+          </button>
+        )}
       </div>
       <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--muted)' }}>
         {figure.bio}
