@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 
+const supabase = getSupabaseBrowser()
+
 export default function AuthButton() {
   const [user, setUser] = useState<{ email?: string | null } | null>(null)
-  const supabase = getSupabaseBrowser()
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }: { data: { user: { email?: string | null } | null } }) => setUser(data.user))
@@ -13,7 +14,7 @@ export default function AuthButton() {
       setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
-  }, [supabase])
+  }, [])
 
   if (!user) return (
     <a href="/login" className="text-sm hover:text-[var(--gold)]" style={{ color: 'var(--muted)' }}>

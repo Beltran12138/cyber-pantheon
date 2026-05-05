@@ -9,11 +9,11 @@ export default function LoginPage() {
 
   async function signInWithEmail() {
     if (!email) return
-    await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
-    setSent(true)
+    if (!error) setSent(true)
   }
 
   async function signInWithGoogle() {
