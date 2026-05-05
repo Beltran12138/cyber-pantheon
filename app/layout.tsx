@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import AuthButton from '@/components/AuthButton'
 
 export const metadata: Metadata = {
   title: '賽博先賢祠',
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/yishi" className="hover:text-[var(--gold)]">議事廳</a>
             <a href="/shengshi" className="hover:text-[var(--gold)]">生詩</a>
             <a href="/wo" className="hover:text-[var(--gold)]">吾祠</a>
+            <AuthButton />
           </nav>
         </header>
         <main className="max-w-5xl mx-auto px-4 py-8">
