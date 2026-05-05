@@ -50,8 +50,10 @@ export async function POST(req: NextRequest) {
         { role: 'user', content: prompt },
       ],
     })
-  } catch {
-    return Response.json({ error: 'upstream failure' }, { status: 502 })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[shengshi] DeepSeek error:', msg)
+    return Response.json({ error: 'upstream failure', detail: msg }, { status: 502 })
   }
 
   const raw = completion.choices[0]?.message?.content ?? ''

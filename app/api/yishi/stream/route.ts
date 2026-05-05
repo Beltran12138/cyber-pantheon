@@ -2,16 +2,14 @@ import { NextRequest } from 'next/server'
 import OpenAI from 'openai'
 import { getFigureBySlug } from '@/lib/figures'
 
-if (!process.env.DEEPSEEK_API_KEY) {
-  throw new Error('DEEPSEEK_API_KEY environment variable is not set')
-}
-
-const deepseek = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY!,
-  baseURL: 'https://api.deepseek.com',
-})
-
 export async function POST(req: NextRequest) {
+  const apiKey = process.env.DEEPSEEK_API_KEY
+  if (!apiKey) {
+    return Response.json({ error: 'DEEPSEEK_API_KEY not configured' }, { status: 500 })
+  }
+
+  const deepseek = new OpenAI({ apiKey, baseURL: 'https://api.deepseek.com' })
+
   const body = await req.json().catch(() => ({}))
   const { question, figureSlug } = body as { question?: string; figureSlug?: string }
 
@@ -41,8 +39,10 @@ export async function POST(req: NextRequest) {
         },
       ],
     })
-  } catch {
-    return Response.json({ error: 'upstream failure' }, { status: 502 })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[yishi/stream] DeepSeek error:', msg)
+    return Response.json({ error: 'upstream failure', detail: msg }, { status: 502 })
   }
 
   const encoder = new TextEncoder()
