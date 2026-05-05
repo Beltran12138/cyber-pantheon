@@ -21,12 +21,13 @@ export default function PoemOverlay({ title, content, figures, onClose, onRegene
     const supabase = getSupabaseBrowser()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { alert('請先登錄'); return }
-    await supabase.from('saved_poems').insert({
+    const { error } = await supabase.from('saved_poems').insert({
       user_id: user.id,
       title,
       content,
       figures,
     })
+    if (error) { alert('收藏失敗：' + error.message); return }
     alert('已收藏至吾祠')
   }
 

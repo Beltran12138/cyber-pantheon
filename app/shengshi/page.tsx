@@ -23,6 +23,8 @@ export default function ShengshiPage() {
       if (res.ok) {
         const data = await res.json()
         setPoem({ title: data.title, content: data.content })
+      } else {
+        alert('生詩失敗，請稍後再試')
       }
     } finally {
       setLoading(false)

@@ -2,16 +2,15 @@ import { NextRequest } from 'next/server'
 import OpenAI from 'openai'
 import { getFiguresBySlug } from '@/lib/figures'
 
-if (!process.env.DEEPSEEK_API_KEY) {
-  throw new Error('DEEPSEEK_API_KEY environment variable is not set')
-}
-
-const deepseek = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-})
-
 export async function POST(req: NextRequest) {
+  if (!process.env.DEEPSEEK_API_KEY) {
+    return Response.json({ error: 'server misconfigured' }, { status: 500 })
+  }
+  const deepseek = new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY,
+    baseURL: 'https://api.deepseek.com',
+  })
+
   const body = await req.json().catch(() => ({}))
   const { situation, figures: figureSlugs = [], councilContext = '' } = body as {
     situation?: string
