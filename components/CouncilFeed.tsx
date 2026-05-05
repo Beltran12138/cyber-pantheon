@@ -28,7 +28,7 @@ export default function CouncilFeed({ messages }: Props) {
               {msg.content}
               {msg.streaming && (
                 <span
-                  className="inline-block w-1.5 h-4 ml-0.5 align-text-bottom animate-pulse"
+                  className="inline-block w-1.5 h-4 ml-0.5 align-text-bottom animate-[blink_1s_step-end_infinite]"
                   style={{ background: 'var(--gold)' }}
                 />
               )}

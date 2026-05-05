@@ -43,7 +43,8 @@ function YishiInner() {
         })
         if (!res.ok || !res.body) return
         const reader = res.body.getReader()
-        const dec = new TextDecoder()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dec = new TextDecoder('utf-8', { stream: true } as any)
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
@@ -104,7 +105,7 @@ function YishiInner() {
 
       <button
         onClick={submitCouncil}
-        disabled={loading || !question.trim() || selected.length === 0}
+        disabled={loading || generatingPoem || !question.trim() || selected.length === 0}
         className="btn-gold w-full py-2 disabled:opacity-50"
       >
         {loading ? '先賢議中…' : generatingPoem ? '詩成中…' : '召喚議事廳'}
@@ -126,7 +127,7 @@ function YishiInner() {
 
 export default function YishiPage() {
   return (
-    <Suspense>
+    <Suspense fallback={null}>
       <YishiInner />
     </Suspense>
   )
