@@ -6,6 +6,7 @@ import type { Figure } from '@/types'
 export default function FigureDetailClient({ figure }: { figure: Figure }) {
   const [enshrined, setEnshrined] = useState(false)
   const [user, setUser] = useState<{ id: string } | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const supabase = getSupabaseBrowser()
 
   useEffect(() => {
@@ -20,22 +21,30 @@ export default function FigureDetailClient({ figure }: { figure: Figure }) {
           .eq('figure_slug', figure.slug)
           .maybeSingle()
           .then((r: { data: unknown }) => setEnshrined(!!r.data))
+          .catch(() => setEnshrined(false))
       }
     })
-  }, [figure.slug])
+  }, [figure.slug, supabase])
 
   async function toggleEnshrine() {
     if (!user) { window.location.href = '/login'; return }
-    if (enshrined) {
-      await supabase.from('enshrines')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('figure_slug', figure.slug)
-      setEnshrined(false)
-    } else {
-      await supabase.from('enshrines')
-        .insert({ user_id: user.id, figure_slug: figure.slug })
-      setEnshrined(true)
+    setIsLoading(true)
+    try {
+      if (enshrined) {
+        await supabase.from('enshrines')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('figure_slug', figure.slug)
+        setEnshrined(false)
+      } else {
+        await supabase.from('enshrines')
+          .insert({ user_id: user.id, figure_slug: figure.slug })
+        setEnshrined(true)
+      }
+    } catch (err) {
+      console.error('供奉操作失敗:', err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -49,8 +58,12 @@ export default function FigureDetailClient({ figure }: { figure: Figure }) {
             {figure.tags.map(t => <span key={t} className="tag">{t}</span>)}
           </div>
         </div>
-        <button onClick={toggleEnshrine} className={enshrined ? 'btn-gold' : 'btn-ghost'}>
-          {enshrined ? '✦ 已供奉' : '✦ 供奉'}
+        <button
+          onClick={toggleEnshrine}
+          disabled={isLoading}
+          className={enshrined ? 'btn-gold' : 'btn-ghost'}
+        >
+          {isLoading ? '...' : enshrined ? '✦ 已供奉' : '✦ 供奉'}
         </button>
       </div>
 
