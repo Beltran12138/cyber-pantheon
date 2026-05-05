@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback, Suspense } from 'react'
+import { useState, useCallback, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import FigureSelector from '@/components/FigureSelector'
 import CouncilFeed from '@/components/CouncilFeed'
@@ -18,9 +18,11 @@ function YishiInner() {
   const [loading, setLoading] = useState(false)
   const [poem, setPoem] = useState<{ title: string; content: string; figures: string[] } | null>(null)
   const [generatingPoem, setGeneratingPoem] = useState(false)
+  const submittingRef = useRef(false)
 
   const submitCouncil = useCallback(async () => {
-    if (!question.trim() || selected.length === 0 || loading) return
+    if (!question.trim() || selected.length === 0 || submittingRef.current) return
+    submittingRef.current = true
     setLoading(true)
     setMessages([])
     setPoem(null)
@@ -45,15 +47,19 @@ function YishiInner() {
         const reader = res.body.getReader()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dec = new TextDecoder('utf-8', { stream: true } as any)
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          const delta = dec.decode(value)
-          setMessages(prev => prev.map(m =>
-            m.figureSlug === fig.slug
-              ? { ...m, content: m.content + delta }
-              : m
-          ))
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            const delta = dec.decode(value)
+            setMessages(prev => prev.map(m =>
+              m.figureSlug === fig.slug
+                ? { ...m, content: m.content + delta }
+                : m
+            ))
+          }
+        } catch {
+          reader.cancel()
         }
         setMessages(prev => prev.map(m =>
           m.figureSlug === fig.slug ? { ...m, streaming: false } : m
@@ -75,8 +81,9 @@ function YishiInner() {
       }
     } finally {
       setGeneratingPoem(false)
+      submittingRef.current = false
     }
-  }, [question, selected, loading])
+  }, [question, selected])
 
   return (
     <div className="max-w-2xl mx-auto">

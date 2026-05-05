@@ -8,8 +8,8 @@ export default function CouncilFeed({ messages }: Props) {
 
   return (
     <div className="flex flex-col gap-4 mt-6">
-      {messages.map((msg) => (
-        <div key={msg.figureSlug} className="flex gap-3">
+      {messages.map((msg, i) => (
+        <div key={`${msg.figureSlug}-${i}`} className="flex gap-3">
           <div
             className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-semibold"
             style={{ background: 'var(--gold-light)', color: 'var(--text)' }}
