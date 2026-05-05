@@ -1,6 +1,8 @@
 'use client'
-import { useState, useCallback, useRef, Suspense } from 'react'
+import { useState, useCallback, useRef, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { getSupabaseBrowser } from '@/lib/supabase-browser'
+import type { AuthResponse } from '@supabase/supabase-js'
 import FigureSelector from '@/components/FigureSelector'
 import CouncilFeed from '@/components/CouncilFeed'
 import PoemOverlay from '@/components/PoemOverlay'
@@ -19,6 +21,23 @@ function YishiInner() {
   const [poem, setPoem] = useState<{ title: string; content: string; figures: string[] } | null>(null)
   const [generatingPoem, setGeneratingPoem] = useState(false)
   const submittingRef = useRef(false)
+
+  useEffect(() => {
+    if (initialFigure) return
+    const supabase = getSupabaseBrowser()
+    supabase.auth.getUser().then(async (result: AuthResponse) => {
+      const user = result.data.user
+      if (!user) return
+      const { data: enshrines } = await supabase
+        .from('enshrines')
+        .select('figure_slug')
+        .eq('user_id', user.id)
+        .limit(5)
+      if (enshrines && enshrines.length > 0) {
+        setSelected(enshrines.map((e: { figure_slug: string }) => e.figure_slug))
+      }
+    })
+  }, [initialFigure])
 
   const submitCouncil = useCallback(async () => {
     if (!question.trim() || selected.length === 0 || submittingRef.current) return
